@@ -4,7 +4,7 @@
     <application android:label="قاعدة" android:supportsRtl="true"
         android:theme="@android:style/Theme.Material.Light.NoActionBar">
         <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713"/>
+            android:value="ca-app-pub-4990542306414954~2363238135"/>
         <activity android:name=".MainActivity" android:exported="true"
             android:configChanges="orientation|screenSize|keyboardHidden">
             <intent-filter>

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>قاعدة – Hidden Rule</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f3f0ff;--card:#fff;--ink:#1f1b3a;--mute:#6d6890;--line:#ddd6f7;--ac:#6d4aff;--ok:#1f9d62;--no:#e5484d;--gold:#f0b429;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14112b;--card:#1f1b3d;--ink:#f1eeff;--mute:#a8a2d0;--line:#352f66}}
+:root[data-theme="dark"]{--bg:#14112b;--card:#1f1b3d;--ink:#f1eeff;--mute:#a8a2d0;--line:#352f66}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Tajawal,system-ui,sans-serif;line-height:1.5}
+#app{max-width:440px;margin:0 auto;padding:16px 16px 80px}
+header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px}
+header h1{margin:0;font-size:1.5rem;font-weight:900;flex:1}
+.chip{font:inherit;font-size:.85rem;font-weight:700;padding:4px 12px;border-radius:99px;border:2px solid var(--line);background:var(--card);color:inherit;cursor:pointer}
+.chip.pro{border-color:var(--gold)}
+.chip.pro.on{background:var(--gold);color:#1f1b3a}
+.card{background:var(--card);border:2px solid var(--line);border-radius:20px;padding:16px;margin-bottom:12px}
+.mute{color:var(--mute);font-size:.92rem}
+.btn{display:block;width:100%;font:inherit;font-weight:900;border:0;border-radius:14px;padding:13px 16px;margin-bottom:8px;cursor:pointer;background:var(--ac);color:#fff}
+.btn.alt{background:transparent;color:inherit;border:2px solid var(--line)}
+.btn[disabled]{opacity:.5}
+.row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.t{aspect-ratio:1;border-radius:16px;border:3px solid var(--line);background:var(--card);font:inherit;font-size:1.5rem;line-height:1;cursor:pointer;position:relative;display:grid;place-items:center;letter-spacing:-2px}
+.t.y{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 16%,var(--card))}
+.t.n{border-color:var(--no);background:color-mix(in srgb,var(--no) 14%,var(--card))}
+.t b{position:absolute;top:2px;inset-inline-start:5px;font-size:.8rem;letter-spacing:0}
+.c0{color:#e5484d}.c1{color:#2f6fed}.c2{color:#1f9d62}.c3{color:#e0a100}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center;z-index:9}
+.sheet{background:var(--bg);width:100%;max-width:440px;border-radius:24px 24px 0 0;padding:20px 18px calc(20px + env(safe-area-inset-bottom,0px));max-height:90%;overflow:auto}
+.sheet h2{margin:0 0 10px}
+.sheet ul{padding-inline-start:20px;margin:0 0 14px}
+pre{background:var(--card);border:2px solid var(--line);border-radius:12px;padding:10px;white-space:pre-wrap;font:inherit;margin:0 0 10px}
+.toast{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:12px;opacity:0;transition:opacity .25s;pointer-events:none;z-index:10;text-align:center}
+.toast.on{opacity:1}
+button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+input{font:inherit;width:100%;padding:10px 12px;border-radius:12px;border:2px solid var(--line);background:var(--card);color:inherit;margin-bottom:8px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="toast" id="toast" role="status"></div>
+<script>
+const $=s=>document.querySelector(s);
+const ld=(k,d)=>{try{const v=localStorage.getItem("hr_"+k);return v?JSON.parse(v):d}catch(e){return d}};
+let lang=ld("lang","ar"),st=ld("st",{streak:0,last:"",pro:false,pd:"",pc:0,daily:null});
+const A=window.Android||null;if(A&&A.isPro())st.pro=true;let FH=false;
+const sv=()=>{try{localStorage.setItem("hr_st",JSON.stringify(st));localStorage.setItem("hr_lang",JSON.stringify(lang))}catch(e){}};
+const day=()=>new Date().toISOString().slice(0,10);
+const dd=(a,b)=>Math.round((Date.parse(b)-Date.parse(a))/864e5);
+if(st.last&&dd(st.last,day())>(st.pro?2:1))st.streak=0;
+const X={
+ar:{t:"قاعدة 🧩",how:"في قاعدة خفية. اضغط على المربعات: ✅ يعني مطابق، ❌ يعني لأ. اكتشف القاعدة بأقل ضغطات!",daily:"تحدي اليوم",dailyDone:"خلصت تحدي اليوم ✓",prac:"تمرين",left:"ضغطات",guess:"خمّن القاعدة",hint:"تلميح 💡",ask:"إيه القاعدة؟",ok:"صح! 🎉",no:"غلط 😅",was:"القاعدة كانت:",copy:"نسخ النتيجة",copied:"اتنسخت ✓",home:"الرئيسية",more:"تمرين تاني",pw:"برو ✨",pwd:"افتح كل حاجة بدفعة واحدة.",f:["تمارين بلا حدود بقواعد أصعب","بدون إعلانات 🚫","تلميحات فورية 💡 بدون إعلان","حماية السلسلة 🔥 (يوم فايت)"],buy:"ادفع 3$ وافتح برو",later:"مش دلوقتي",lim:"خلصت تمارين النهاردة المجانية (3).",done:"تم تفعيل برو (تجربة فقط، مفيش دفع حقيقي)",out:"خلصت الضغطات، خمّن!",hp:"التلميحات في برو.",ad:"شاهد إعلان واحصل على تلميح",noad:"الإعلان مش جاهز، جرّب كمان شوية",act:"تفعيل بالكود",bad:"الكود غلط"},
+en:{t:"Hidden Rule 🧩",how:"There's a secret rule. Tap tiles: ✅ matches, ❌ doesn't. Find the rule in as few taps as you can!",daily:"Daily puzzle",dailyDone:"Today's puzzle done ✓",prac:"Practice",left:"taps",guess:"Guess the rule",hint:"Hint 💡",ask:"What's the rule?",ok:"Correct! 🎉",no:"Nope 😅",was:"The rule was:",copy:"Copy result",copied:"Copied ✓",home:"Home",more:"Another one",pw:"Pro ✨",pwd:"Unlock everything with one payment.",f:["Unlimited practice, harder rules","No ads 🚫","Instant hints 💡 without ads","Streak protection 🔥 (1 missed day)"],buy:"Get Pro for $3",later:"Not now",lim:"You've used today's 3 free practices.",done:"Pro enabled (demo only, no real payment)",out:"Out of taps, take a guess!",hp:"Hints are a Pro feature.",ad:"Watch an ad for a hint",noad:"Ad not ready, try again soon",act:"Redeem code",bad:"Invalid code"}};
+const t=k=>X[lang][k];
+const R=[["أحمر","Red",o=>o.c==0],["أزرق","Blue",o=>o.c==1],["أخضر","Green",o=>o.c==2],["دايرة","Circle",o=>o.s==0],["مربع","Square",o=>o.s==1],["مثلث","Triangle",o=>o.s==2],["نجمة","Star",o=>o.s==3],["عددها 2","Count is 2",o=>o.n==2],["عددها 3","Count is 3",o=>o.n==3],
+["مش أصفر","Not yellow",o=>o.c!=3],["أحمر أو دايرة","Red or circle",o=>o.c==0||o.s==0],["مثلث أو نجمة","Triangle or star",o=>o.s>=2],["عددها أكتر من 1","Count above 1",o=>o.n>1],["عددها 1 ومش أحمر","Count 1, not red",o=>o.n==1&&o.c!=0],["أزرق أو أخضر","Blue or green",o=>o.c==1||o.c==2]];
+const rn=i=>R[i][lang=="ar"?0:1];
+const GL=["●","■","▲","★"];
+function rng(s){return()=>{s|=0;s=s+0x6D2B79F5|0;let x=Math.imul(s^s>>>15,1|s);x=x+Math.imul(x^x>>>7,61|x)^x;return((x^x>>>14)>>>0)/4294967296}}
+const hash=s=>{let h=7;for(const c of s)h=Math.imul(31,h)+c.charCodeAt(0)|0;return h};
+function shuf(a,r){for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function gen(r,pool){
+  for(let k=0;k<500;k++){
+    const ri=pool[Math.floor(r()*pool.length)];
+    const board=Array.from({length:12},()=>({c:Math.floor(r()*4),s:Math.floor(r()*4),n:1+Math.floor(r()*3)}));
+    const v=board.filter(R[ri][2]).length;if(v<4||v>8)continue;
+    const ds=R.map((_,i)=>i).filter(j=>j!==ri&&board.filter(o=>!!R[j][2](o)!==!!R[ri][2](o)).length>=2);
+    if(ds.length<3)continue;
+    return{board,ri,opts:shuf([ri,...shuf(ds,r).slice(0,3)],r)};
+  }
+}
+const ALL=R.map((_,i)=>i),EASY=[0,1,2,3,4,5,6,7,8];
+let G=null,sheet="";
+function toast(m){const e=$("#toast");e.textContent=m;e.classList.add("on");setTimeout(()=>e.classList.remove("on"),2200)}
+const grid=()=>{let s="";G.board.forEach((_,i)=>{s+=!(i in G.rev)?"⬜":G.rev[i]?"✅":"❌";if(i%4==3)s+="\n"});return s};
+function shareTxt(d){return `${t("t")} ${d.day}\n${d.stars?"⭐".repeat(d.stars):"✖"} ${d.tp}/8\n${d.grid}`}
+function render(){
+  document.documentElement.lang=lang;document.documentElement.dir=lang=="ar"?"rtl":"ltr";
+  const done=st.daily&&st.daily.day==day();
+  let b=`<header><h1>${t("t")}</h1><span class="chip">🔥 ${st.streak}</span><button class="chip" data-a="lang">${lang=="ar"?"EN":"ع"}</button><button class="chip pro ${st.pro?"on":""}" data-a="pro">${t("pw")}</button></header>`;
+  if(!G){
+    const left=st.pro?"∞":Math.max(0,3-(st.pd==day()?st.pc:0));
+    b+=`<div class="card mute">${t("how")}</div>
+    <button class="btn" data-a="daily">${done?t("dailyDone"):"▶ "+t("daily")}</button>
+    <button class="btn alt" data-a="prac">${t("prac")} (${left})</button>`;
+  }else{
+    const used=Object.keys(G.rev).length,tl=8-G.taps;
+    b+=`<div class="row"><b>${G.mode=="d"?t("daily"):t("prac")}</b><span class="mute">${tl} ${t("left")}</span></div><div class="grid">`+
+    G.board.map((o,i)=>`<button class="t ${i in G.rev?(G.rev[i]?"y":"n"):""} c${o.c}" data-a="tap" data-i="${i}" aria-label="tile ${i+1}">${i in G.rev?`<b>${G.rev[i]?"✅":"❌"}</b>`:""}${GL[o.s].repeat(o.n)}</button>`).join("")+`</div>
+    <button class="btn" data-a="guess" ${used?"":"disabled"}>${t("guess")}</button>
+    <button class="btn alt" data-a="hint">${t("hint")} ${st.pro?"":"🔒"}</button>
+    <button class="btn alt" data-a="home">${t("home")}</button>`;
+  }
+  $("#app").innerHTML=b+sheet;
+}
+function start(mode){
+  let r,pool;
+  if(mode=="d"){r=rng(hash(day()));pool=ALL}
+  else{
+    if(st.pd!=day()){st.pd=day();st.pc=0}
+    if(!st.pro&&st.pc>=3)return paywall(t("lim"));
+    st.pc++;sv();r=Math.random;pool=st.pro?ALL:EASY;
+  }
+  const p=gen(rng(mode=="d"?hash(day()):Math.floor(Math.random()*1e9)),pool);
+  G={mode,...p,rev:{},taps:0,over:false};sheet="";render();
+}
+function paywall(m){
+  sheet=`<div class="ov" data-a="close"><div class="sheet" data-stop><h2>${t("pw")}</h2><p class="mute">${m||t("pwd")}</p><ul>${t("f").map(x=>`<li>${x}</li>`).join("")}</ul><button class="btn" data-a="buy">${t("buy")}</button>${A?`<input id="cd" dir="ltr" placeholder="HR-XXXXXX-XXXX"><button class="btn alt" data-a="redeem">${t("act")}</button>`:""}<button class="btn alt" data-a="close">${t("later")}</button></div></div>`;render();
+}
+function hintOffer(){sheet=`<div class="ov" data-a="close"><div class="sheet" data-stop><h2>${t("hint")}</h2><button class="btn" data-a="ad">▶ ${t("ad")}</button><button class="btn alt" data-a="pro">${t("pw")}</button><button class="btn alt" data-a="close">${t("later")}</button></div></div>`;render()}
+window.onReward=ok=>{if(ok){FH=true;const b=document.querySelector('[data-a="hint"]');if(b)b.click()}else toast(t("noad"))};
+function opts(){
+  sheet=`<div class="ov" data-a="close"><div class="sheet" data-stop><h2>${t("ask")}</h2>${G.opts.map(i=>`<button class="btn alt" data-a="pick" data-i="${i}">${rn(i)}</button>`).join("")}</div></div>`;render();
+}
+function result(d,ri){
+  sheet=`<div class="ov" data-a="close"><div class="sheet" data-stop><h2>${d.stars?t("ok"):t("no")} ${"⭐".repeat(d.stars)}</h2><p>${t("was")} <b>${rn(ri)}</b></p><pre>${shareTxt(d)}</pre>
+  <button class="btn" data-a="copy">${t("copy")}</button><button class="btn alt" data-a="more">${t("more")}</button><button class="btn alt" data-a="home">${t("home")}</button></div></div>`;render();
+}
+function finish(c){
+  const ok=c==G.ri,tp=G.taps,stars=ok?(tp<=4?3:tp<=6?2:1):0;
+  G.over=true;
+  const d={day:day(),stars,tp,grid:grid(),ri:G.ri};
+  if(G.mode=="d"){
+    st.daily=d;
+    if(st.last!=day()){st.streak=(st.last&&dd(st.last,day())<=(st.pro?2:1))?st.streak+1:1;st.last=day()}
+  }
+  sv();G.d=d;result(d,G.ri);
+}
+document.addEventListener("click",e=>{
+  const b=e.target.closest("[data-a]");if(!b)return;
+  if(b.classList.contains("ov")&&e.target.closest("[data-stop]"))return;
+  const a=b.dataset.a;
+  if(a=="lang"){lang=lang=="ar"?"en":"ar";sv()}
+  else if(a=="pro"){if(st.pro)toast("Pro ✓");else return paywall()}
+  else if(a=="buy"){if(A){A.buy();return}st.pro=true;sheet="";sv();toast(t("done"))}
+  else if(a=="close"){sheet="";if(G&&!G.board.length)G=null}
+  else if(a=="home"){G=null;sheet=""}
+  else if(a=="daily"){if(st.daily&&st.daily.day==day()){G={mode:"d",ri:st.daily.ri,rev:{},board:[],taps:0};return result(st.daily,st.daily.ri)}return start("d")}
+  else if(a=="ad"){sheet="";render();A.reward();return}
+  else if(a=="redeem"){const v=$("#cd").value;if(A&&A.redeem(v)){st.pro=true;sheet="";sv();toast("Pro ✓")}else return toast(t("bad"))}
+  else if(a=="prac"||a=="more"){if(!st.pro&&A&&(st.fin=(st.fin||0)+1)%3==0)A.inter();return start("p")}
+  else if(a=="tap"){
+    const i=+b.dataset.i;if(G.over||i in G.rev)return;
+    if(G.taps>=8)return toast(t("out"));
+    G.rev[i]=!!R[G.ri][2](G.board[i]);G.taps++;
+    if(G.taps==8)toast(t("out"));
+  }
+  else if(a=="hint"){
+    if(!st.pro&&!FH)return A?hintOffer():paywall(t("hp"));FH=false;
+    const cons=ALL.filter(i=>Object.keys(G.rev).every(k=>!!R[i][2](G.board[k])===G.rev[k]));
+    let best=-1,bs=1e9;
+    G.board.forEach((o,k)=>{if(k in G.rev)return;const c=cons.filter(i=>R[i][2](o)).length,sc=Math.abs(c-cons.length/2);if(sc<bs){bs=sc;best=k}});
+    if(best>=0)G.rev[best]=!!R[G.ri][2](G.board[best]);
+  }
+  else if(a=="guess"){return opts()}
+  else if(a=="pick"){return finish(+b.dataset.i)}
+  else if(a=="copy"){
+    const d=G.d||st.daily;if(A){A.share(shareTxt(d));return}
+    try{navigator.clipboard.writeText(shareTxt(d)).then(()=>toast(t("copied")),()=>{})}catch(x){}
+    return;
+  }
+  render();
+});
+render();
+</script>
+</body>
+</html>

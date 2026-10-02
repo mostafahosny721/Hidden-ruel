@@ -25,9 +25,9 @@ import java.security.MessageDigest
 // ====== غيّر القيم دي لما تجهز ======
 object Cfg {
     // أرقام اختبار من جوجل. استبدلها بأرقامك من AdMob قبل النشر
-    const val BANNER = "ca-app-pub-3940256099942544/6300978111"
-    const val INTER = "ca-app-pub-3940256099942544/1033173712"
-    const val REWARD = "ca-app-pub-3940256099942544/5224354917"
+    const val BANNER = "ca-app-pub-4990542306414954/3473314836"
+    const val INTER = "ca-app-pub-4990542306414954/1007592735"
+    const val REWARD = "ca-app-pub-4990542306414954/5685204349"
     // رابط الدفع بتاعك (فودافون كاش، PayPal، إلخ)
     const val PAY_URL = "https://example.com/buy"
     // سر أكواد التفعيل. متغيرهوش وإلا أكوادك في codes.txt هتبطل
